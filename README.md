@@ -17,7 +17,18 @@ Use the **Dark mode** switch in the header to change themes. Your choice is save
 
 ## Deploy on Vercel
 
-The included `vercel.json` rewrites the domain root (`/`) to `memory-allocation-simulation.html`, so the deployed site opens the simulator without requiring an `index.html` or renaming the page. In Vercel, use the folder containing `vercel.json` as the project root and choose the **Other** framework preset with no build command. Commit and push changes, then wait for the new deployment to finish.
+This is a static site: it has no build step, package installation, or server-side runtime. The included `vercel.json` rewrites the domain root (`/`) to `memory-allocation-simulation.html`, so you do not need to rename the page to `index.html`.
+
+### Deploy from the Vercel dashboard
+
+1. Make sure `vercel.json`, `memory-allocation-simulation.html`, `styles.css`, and `script.js` are in the same project folder.
+2. Push that folder to a Git provider supported by Vercel, such as GitHub.
+3. In Vercel, select **Add New → Project** and import the repository.
+4. Set **Root Directory** to the folder containing `vercel.json`.
+5. Choose **Other** for the framework preset. Leave the build and install commands unset; no output directory override is needed.
+6. Select **Deploy**. When deployment completes, open the assigned domain; the root URL should load the simulator.
+
+Push later changes to the connected branch to trigger another deployment. If the root URL returns 404, check that `vercel.json` and the HTML page are included in the deployed commit and located in the configured Root Directory. As a diagnostic, try opening `/memory-allocation-simulation.html` directly on the deployed domain.
 
 ### Try the interactive demo
 
