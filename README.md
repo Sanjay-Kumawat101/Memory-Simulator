@@ -13,6 +13,8 @@ Memory Lab is a small, browser-based teaching tool for visualizing **contiguous 
 
 No server, installation, external assets, or dependencies are required.
 
+Use the **Dark mode** switch in the header to change themes. Your choice is saved in this browser; before you select a theme, the simulator follows your system preference.
+
 ### Try the interactive demo
 
 Select **Load fragmentation demo** in the setup panel to create a fragmented 1,000-byte memory layout. The allocation form is pre-filled with a 150-byte request. Change the fit strategy or requested size to preview the target region in both the map and table before allocating. A request that cannot fit also reports total free bytes and the largest available region.

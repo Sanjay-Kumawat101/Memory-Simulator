@@ -332,6 +332,28 @@ function switchTab(tabName) {
 
 const memoryManager = new MemoryManager();
 
+const themeToggle = document.getElementById('themeToggle');
+const themePreferenceKey = 'memory-lab-theme';
+const savedTheme = window.localStorage.getItem(themePreferenceKey);
+const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+function setTheme(theme) {
+  const isDark = theme === 'dark';
+  document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+  themeToggle.setAttribute('aria-checked', String(isDark));
+  document.querySelector('meta[name="theme-color"]').content = isDark ? '#111827' : '#f5f7fb';
+}
+
+setTheme(savedTheme === 'dark' || savedTheme === 'light'
+  ? savedTheme
+  : systemPrefersDark ? 'dark' : 'light');
+
+themeToggle.addEventListener('click', () => {
+  const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  setTheme(nextTheme);
+  window.localStorage.setItem(themePreferenceKey, nextTheme);
+});
+
 const strategyDescriptions = {
   first: 'Scans from the beginning and selects the first free block large enough.',
   next: 'Continues from the last next-fit position and selects the next block that fits.',
