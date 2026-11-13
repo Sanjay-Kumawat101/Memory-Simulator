@@ -15,6 +15,10 @@ No server, installation, external assets, or dependencies are required.
 
 Use the **Dark mode** switch in the header to change themes. Your choice is saved in this browser; before you select a theme, the simulator follows your system preference.
 
+## Deploy on Vercel
+
+The included `vercel.json` rewrites the domain root (`/`) to `memory-allocation-simulation.html`, so the deployed site opens the simulator without requiring an `index.html` or renaming the page. In Vercel, use the folder containing `vercel.json` as the project root and choose the **Other** framework preset with no build command. Commit and push changes, then wait for the new deployment to finish.
+
 ### Try the interactive demo
 
 Select **Load fragmentation demo** in the setup panel to create a fragmented 1,000-byte memory layout. The allocation form is pre-filled with a 150-byte request. Change the fit strategy or requested size to preview the target region in both the map and table before allocating. A request that cannot fit also reports total free bytes and the largest available region.
