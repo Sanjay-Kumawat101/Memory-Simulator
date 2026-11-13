@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="description" content="An interactive simulator for exploring contiguous memory allocation strategies.">
+  <title>Memory Lab | Allocation Simulator</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="page-header">
+      <a class="brand" href="#" aria-label="Memory Lab home">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span>Memory Lab</span>
+      </a>
+      <span class="header-note">OS MEMORY SIMULATOR</span>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Explore how memory is managed</p>
+        <h1 id="page-title">Memory allocation simulator</h1>
+        <p class="intro-copy">Allocate and release process memory, compare placement strategies, and see fragmentation take shape.</p>
+      </div>
+      <div class="model-badge"><span aria-hidden="true"></span> Contiguous allocation model</div>
+    </section>
+
+    <section class="stats" aria-label="Memory statistics" aria-live="polite">
+      <article class="stat-card">
+        <span class="stat-label">Total memory</span>
+        <strong id="statTotal">Not initialized</strong>
+        <span class="stat-detail">Configured capacity</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">In use</span>
+        <strong id="statUsed">0 bytes</strong>
+        <span class="stat-detail" id="statUsedPercent">0% of capacity</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Available</span>
+        <strong id="statFree">0 bytes</strong>
+        <span class="stat-detail" id="statFreePercent">0% of capacity</span>
+      </article>
+      <article class="stat-card stat-card-accent">
+        <span class="stat-label">External fragmentation</span>
+        <strong id="statFragmentation">0%</strong>
+        <span class="stat-detail">Free space split across regions</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Largest free block</span>
+        <strong id="statLargestFree">0 bytes</strong>
+        <span class="stat-detail">Largest single allocation possible</span>
+      </article>
+    </section>
+
+    <section class="workspace" aria-label="Simulator controls">
+      <div class="workspace-heading">
+        <div>
+          <p class="eyebrow">Simulation controls</p>
+          <h2>Manage memory</h2>
+        </div>
+        <span class="step-hint">Set up memory, then allocate or release processes</span>
+      </div>
+
+      <div class="tab-list" role="tablist" aria-label="Memory operations">
+        <button class="tab active" id="tab-setup" type="button" role="tab" aria-selected="true" aria-controls="panel-setup" data-tab="setup"><span class="tab-number">01</span><span>Setup</span></button>
+        <button class="tab" id="tab-allocate" type="button" role="tab" aria-selected="false" aria-controls="panel-allocate" data-tab="allocate" tabindex="-1"><span class="tab-number">02</span><span>Allocate</span></button>
+        <button class="tab" id="tab-deallocate" type="button" role="tab" aria-selected="false" aria-controls="panel-deallocate" data-tab="deallocate" tabindex="-1"><span class="tab-number">03</span><span>Release</span></button>
+      </div>
+
+      <section class="tab-content active" id="panel-setup" role="tabpanel" aria-labelledby="tab-setup" data-panel="setup">
+        <div class="operation-copy">
+          <h3>Initialize a memory space</h3>
+          <p>Choose the total capacity for this simulation. Initializing again resets all current allocations.</p>
+        </div>
+        <form class="controls" id="setupForm">
+          <div class="control-group">
+            <label for="totalMemory">Total memory <span>(bytes)</span></label>
+            <input type="number" id="totalMemory" min="1" step="1" value="1000" required>
+          </div>
+          <button type="submit" class="button button-primary">Initialize memory <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="demo-callout">
+          <div>
+            <strong>Want to see fragmentation?</strong>
+            <p>Load a ready-made example with gaps of different sizes, then preview how each strategy chooses a block.</p>
+          </div>
+          <button type="button" class="button button-quiet" id="loadDemo">Load fragmentation demo</button>
+        </div>
+      </section>
+
+      <section class="tab-content" id="panel-allocate" role="tabpanel" aria-labelledby="tab-allocate" data-panel="allocate" hidden>
+        <div class="operation-copy">
+          <h3>Place a process into memory</h3>
+          <p>Pick a fit strategy to choose which available region receives the process.</p>
+        </div>
+        <form class="controls" id="allocateForm">
+          <div class="control-group">
+            <label for="processId">Process ID</label>
+            <input type="text" id="processId" placeholder="e.g. P1" maxlength="32" required>
+          </div>
+          <div class="control-group">
+            <label for="memorySize">Requested size <span>(bytes)</span></label>
+            <input type="number" id="memorySize" min="1" step="1" placeholder="e.g. 120" required>
+          </div>
+          <div class="control-group">
+            <label for="fitType">Placement strategy</label>
+            <select id="fitType">
+              <option value="first">First fit</option>
+              <option value="next">Next fit</option>
+              <option value="best">Best fit</option>
+              <option value="worst">Worst fit</option>
+            </select>
+          </div>
+          <button type="submit" class="button button-primary">Allocate process <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="allocation-preview" id="allocationPreview" role="status" aria-live="polite">
+          Choose a size and strategy to preview a placement.
+        </div>
+      </section>
+
+      <section class="tab-content" id="panel-deallocate" role="tabpanel" aria-labelledby="tab-deallocate" data-panel="deallocate" hidden>
+        <div class="operation-copy">
+          <h3>Release a process allocation</h3>
+          <p>Releasing a process returns its region to the free pool. Adjacent free regions are combined.</p>
+        </div>
+        <form class="controls release-controls" id="deallocateForm">
+          <div class="control-group">
+            <label for="processToFree">Process to release</label>
+            <select id="processToFree" disabled>
+              <option value="">No processes allocated</option>
+            </select>
+          </div>
+          <button type="submit" class="button button-secondary">Release memory <span aria-hidden="true">↗</span></button>
+        </form>
+      </section>
+    </section>
+
+    <section class="visualization section-card" aria-labelledby="visualization-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Live memory map</p>
+          <h2 id="visualization-title">Address space</h2>
+        </div>
+        <div class="legend" aria-label="Memory map legend">
+          <span><i class="legend-swatch free" aria-hidden="true"></i>Free</span>
+          <span><i class="legend-swatch allocated" aria-hidden="true"></i>Allocated</span>
+          <span><i class="legend-swatch pointer" aria-hidden="true"></i>Next-fit search</span>
+        </div>
+      </div>
+      <div class="memory-axis" aria-hidden="true"><span>LOW ADDRESS</span><span id="memoryEnd">0 bytes</span></div>
+      <div class="memory-container" id="memoryVisual" role="img" aria-label="Memory map. Initialize memory to begin.">
+        <p class="empty-state">Initialize memory to see the address space.</p>
+      </div>
+      <p class="map-caption">Each segment represents a contiguous region. Segment widths are proportional to their size.</p>
+    </section>
+
+    <section class="section-card blocks-section" aria-labelledby="blocks-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Allocation details</p>
+          <h2 id="blocks-title">Memory blocks</h2>
+        </div>
+        <span class="step-hint" id="blockCount">0 regions</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Memory regions, their address range, capacity, and current owner</caption>
+          <thead>
+            <tr>
+              <th scope="col">Region</th>
+              <th scope="col">Start address</th>
+              <th scope="col">End address</th>
+              <th scope="col">Size</th>
+              <th scope="col">Status</th>
+              <th scope="col">Process</th>
+            </tr>
+          </thead>
+          <tbody id="memoryTableBody">
+            <tr class="empty-row"><td colspan="6">No regions yet. Initialize memory to get started.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section-card log-section" aria-labelledby="log-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Simulation history</p>
+          <h2 id="log-title">Activity log</h2>
+        </div>
+        <span class="live-indicator"><span aria-hidden="true"></span> LIVE</span>
+      </div>
+      <div class="log-container" id="logContainer" role="log" aria-live="polite" aria-relevant="additions">
+        <p class="log-entry info">System ready. Initialize memory to begin.</p>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      <span>Memory Lab</span>
+      <span>Educational model — not a measurement of your computer's physical memory.</span>
+    </footer>
+  </main>
+</body>
+</html>
